@@ -23,6 +23,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
 
+      - name: Check Render API Key presence
+        run: |
+          if [ -z "$RENDER_API_KEY" ]; then
+            echo "❌ RENDER_API_KEY is not set. Please add it to your repository secrets."
+            exit 1
+          else
+            echo "✅ RENDER_API_KEY is set."
+          fi
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+
       - name: Trigger deploy via Render API
         id: trigger_deploy
         env:
@@ -37,9 +48,9 @@ jobs:
           echo "response_code=$response" >> $GITHUB_OUTPUT
 
           if [ "$response" -eq 200 ] || [ "$response" -eq 201 ]; then
-            echo "Deploy triggered successfully."
+            echo "✅ Deploy triggered successfully."
           else
-            echo "Failed to trigger deploy. HTTP status code: $response"
+            echo "❌ Failed to trigger deploy. HTTP status code: $response"
             exit 1
           fi
 

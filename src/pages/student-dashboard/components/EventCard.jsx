@@ -33,6 +33,22 @@ const EventCard = ({ event, onJoinEvent, onViewDetails }) => {
     });
   };
 
+  const handleJoinClick = () => {
+    if (event?.status === 'upcoming' && event?.type === 'ONLINE') {
+      // For virtual events - redirect to meeting link
+      if (event?.meetingLink) {
+        window.open(event.meetingLink, '_blank');
+        onJoinEvent?.(event);
+      }
+    } else if (event?.status === 'upcoming' && event?.type === 'OFFLINE') {
+      // For offline events - trigger registration modal
+      onJoinEvent?.(event);
+    } else {
+      // For live or completed events
+      onJoinEvent?.(event);
+    }
+  };
+
   return (
     <div className="bg-card border border-border rounded-lg overflow-hidden hover:shadow-elevation-2 transition-smooth">
       <div className="relative h-48 overflow-hidden">
@@ -51,6 +67,13 @@ const EventCard = ({ event, onJoinEvent, onViewDetails }) => {
             ${event?.price}
           </div>
         )}
+        <div className="absolute top-4 right-16">
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+            event?.type === 'ONLINE' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
+          }`}>
+            {event?.type === 'ONLINE' ? 'VIRTUAL' : 'OFFLINE'}
+          </span>
+        </div>
       </div>
       <div className="p-6">
         <div className="flex items-start justify-between mb-3">
@@ -65,7 +88,7 @@ const EventCard = ({ event, onJoinEvent, onViewDetails }) => {
         </div>
 
         <div className="flex items-center text-sm text-muted-foreground mb-2">
-          <Icon name={event?.type === 'virtual' ? 'Monitor' : 'MapPin'} size={16} className="mr-2" />
+          <Icon name={event?.type === 'ONLINE' ? 'Monitor' : 'MapPin'} size={16} className="mr-2" />
           <span className="line-clamp-1">{event?.location}</span>
         </div>
 
@@ -93,7 +116,7 @@ const EventCard = ({ event, onJoinEvent, onViewDetails }) => {
               size="sm"
               iconName="Play"
               iconPosition="left"
-              onClick={() => onJoinEvent(event)}
+              onClick={handleJoinClick}
             >
               Join Now
             </Button>
@@ -101,13 +124,13 @@ const EventCard = ({ event, onJoinEvent, onViewDetails }) => {
           
           {event?.status === 'upcoming' && (
             <Button
-              variant="secondary"
+              variant="default"
               size="sm"
-              iconName="Calendar"
+              iconName={event?.type === 'ONLINE' ? 'ExternalLink' : 'Calendar'}
               iconPosition="left"
-              onClick={() => onJoinEvent(event)}
+              onClick={handleJoinClick}
             >
-              Add to Calendar
+              Join
             </Button>
           )}
           

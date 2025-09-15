@@ -27,6 +27,14 @@ const SocialAuth = ({ onSocialAuth, loading }) => {
       bgColor: 'bg-gray-900 hover:bg-gray-800',
       textColor: 'text-white',
       borderColor: 'border-gray-900'
+    },
+    {
+      id: 'apple',
+      name: 'iOS',
+      icon: 'Apple',
+      bgColor: 'bg-black hover:bg-gray-900',
+      textColor: 'text-white',
+      borderColor: 'border-black'
     }
   ];
 

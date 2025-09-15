@@ -8,14 +8,191 @@ import AnalyticsWidgets from './components/AnalyticsWidgets';
 import QuickActions from './components/QuickActions';
 import RevenueTracking from './components/RevenueTracking';
 import AttendeeManagement from './components/AttendeeManagement';
+import NotificationCenter from './components/NotificationCenter';
+import ChatSection from './components/ChatSection';
 import Icon from '../../components/AppIcon';
 import Button from '../../components/ui/Button';
+import Input from '../../components/ui/Input';
+
+// Profile Form Component
+const ProfileForm = ({ profile, onSave }) => {
+  const [formData, setFormData] = useState(profile);
+  const [isEditing, setIsEditing] = useState(false);
+
+  useEffect(() => {
+    setFormData(profile);
+  }, [profile]);
+
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleSave = () => {
+    onSave(formData);
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setFormData(profile);
+    setIsEditing(false);
+  };
+
+  if (!isEditing) {
+    return (
+      <div className="space-y-6">
+        <div className="grid md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-card-foreground mb-2">
+              Host Name
+            </label>
+            <p className="text-muted-foreground">{profile.name || 'Not set'}</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-card-foreground mb-2">
+              Email
+            </label>
+            <p className="text-muted-foreground">{profile.email || 'Not set'}</p>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-card-foreground mb-2">
+            Bio
+          </label>
+          <p className="text-muted-foreground">{profile.bio || 'Not set'}</p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-card-foreground mb-2">
+              Location
+            </label>
+            <p className="text-muted-foreground">{profile.location || 'Not set'}</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-card-foreground mb-2">
+              Contact Details
+            </label>
+            <p className="text-muted-foreground">{profile.contactDetails || 'Not set'}</p>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-card-foreground mb-2">
+            Organization
+          </label>
+          <p className="text-muted-foreground">{profile.organization || 'Not set'}</p>
+        </div>
+
+        <div className="flex justify-end">
+          <Button onClick={() => setIsEditing(true)} variant="default">
+            Edit Profile
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="grid md:grid-cols-2 gap-6">
+        <div>
+          <label className="block text-sm font-medium text-card-foreground mb-2">
+            Host Name *
+          </label>
+          <Input
+            value={formData.name}
+            onChange={(e) => handleInputChange('name', e.target.value)}
+            placeholder="Enter your full name"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-card-foreground mb-2">
+            Email *
+          </label>
+          <Input
+            type="email"
+            value={formData.email}
+            onChange={(e) => handleInputChange('email', e.target.value)}
+            placeholder="Enter your email"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-card-foreground mb-2">
+          Bio
+        </label>
+        <textarea
+          value={formData.bio}
+          onChange={(e) => handleInputChange('bio', e.target.value)}
+          placeholder="Tell us about yourself and your experience"
+          className="w-full min-h-[100px] px-3 py-2 border border-input bg-background rounded-md text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent resize-vertical"
+        />
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        <div>
+          <label className="block text-sm font-medium text-card-foreground mb-2">
+            Location
+          </label>
+          <Input
+            value={formData.location}
+            onChange={(e) => handleInputChange('location', e.target.value)}
+            placeholder="City, State/Country"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-card-foreground mb-2">
+            Contact Details
+          </label>
+          <Input
+            value={formData.contactDetails}
+            onChange={(e) => handleInputChange('contactDetails', e.target.value)}
+            placeholder="Phone number"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-card-foreground mb-2">
+          Organization
+        </label>
+        <Input
+          value={formData.organization}
+          onChange={(e) => handleInputChange('organization', e.target.value)}
+          placeholder="Company or organization name"
+        />
+      </div>
+
+      <div className="flex space-x-4 justify-end">
+        <Button onClick={handleCancel} variant="outline">
+          Cancel
+        </Button>
+        <Button onClick={handleSave} variant="default">
+          Save Changes
+        </Button>
+      </div>
+    </div>
+  );
+};
 
 const HostDashboard = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [hostProfile, setHostProfile] = useState({
+    name: '',
+    email: '',
+    bio: '',
+    location: '',
+    contactDetails: '',
+    organization: ''
+  });
 
   // Mock data for events
   const mockEvents = [
@@ -221,6 +398,43 @@ const HostDashboard = () => {
     return () => clearInterval(timer);
   }, []);
 
+  // Load host profile from localStorage
+  useEffect(() => {
+    const savedProfile = localStorage.getItem('hostProfile');
+    if (savedProfile) {
+      try {
+        setHostProfile(JSON.parse(savedProfile));
+      } catch (error) {
+        console.error('Error loading host profile:', error);
+        // Set default profile if parsing fails
+        setHostProfile({
+          name: 'John Smith',
+          email: 'john.smith@host.com',
+          bio: 'Experienced event organizer specializing in tech conferences and workshops.',
+          location: 'San Francisco, CA',
+          contactDetails: '+1 (555) 123-4567',
+          organization: 'Tech Events Inc.'
+        });
+      }
+    } else {
+      // Set default profile for new users
+      setHostProfile({
+        name: 'John Smith',
+        email: 'john.smith@host.com',
+        bio: 'Experienced event organizer specializing in tech conferences and workshops.',
+        location: 'San Francisco, CA',
+        contactDetails: '+1 (555) 123-4567',
+        organization: 'Tech Events Inc.'
+      });
+    }
+  }, []);
+
+  const handleSaveProfile = (updatedProfile) => {
+    setHostProfile(updatedProfile);
+    localStorage.setItem('hostProfile', JSON.stringify(updatedProfile));
+    console.log('Host profile saved:', updatedProfile);
+  };
+
   const handleEditEvent = (eventId) => {
     navigate('/event-creation-wizard', { state: { editMode: true, eventId } });
   };
@@ -239,8 +453,40 @@ const HostDashboard = () => {
   };
 
   const handleExportData = () => {
-    console.log('Exporting attendee data...');
-    // Mock data export
+    // Create and download CSV file
+    const csvData = mockEvents.map(event => ({
+      'Event Title': event.title,
+      'Event Type': event.type,
+      'Date': event.date,
+      'Time': event.time,
+      'Status': event.status,
+      'Attendees': event.attendees,
+      'Capacity': event.capacity,
+      'Revenue': `$${event.revenue}`,
+      'Tickets Sold': event.ticketsSold
+    }));
+
+    const csvContent = "data:text/csv;charset=utf-8," + 
+      Object.keys(csvData[0]).join(",") + "\n" +
+      csvData.map(row => Object.values(row).join(",")).join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "events_export.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleShowEventsDropdown = () => {
+    // Show modal with events list
+    console.log('Showing events dropdown with:', mockEvents);
+  };
+
+  const handleShowAttendeesPage = () => {
+    // Navigate to detailed attendees page
+    setActiveTab('attendees');
   };
 
   const formatTime = (date) => {
@@ -264,11 +510,13 @@ const HostDashboard = () => {
     { id: 'overview', label: 'Overview', icon: 'LayoutDashboard' },
     { id: 'analytics', label: 'Analytics', icon: 'BarChart3' },
     { id: 'revenue', label: 'Revenue', icon: 'DollarSign' },
-    { id: 'attendees', label: 'Attendees', icon: 'Users' }
+    { id: 'attendees', label: 'Attendees', icon: 'Users' },
+    { id: 'notifications', label: 'Notifications', icon: 'Bell' },
+    { id: 'profile', label: 'Profile', icon: 'User' }
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-slate-50">
       <Header 
         userRole="host" 
         isAuthenticated={true} 
@@ -333,6 +581,7 @@ const HostDashboard = () => {
                   onCreateEvent={() => navigate('/event-creation-wizard')}
                   onViewAnalytics={() => setActiveTab('analytics')}
                   onManageAttendees={() => setActiveTab('attendees')}
+                  onExportData={handleExportData}
                 />
                 <EventsTable
                   events={mockEvents}
@@ -344,7 +593,12 @@ const HostDashboard = () => {
             )}
 
             {activeTab === 'analytics' && (
-              <AnalyticsWidgets analyticsData={mockAnalyticsData} />
+              <AnalyticsWidgets 
+                analyticsData={mockAnalyticsData}
+                onEventsClick={handleShowEventsDropdown}
+                onAttendeesClick={handleShowAttendeesPage}
+                mockEvents={mockEvents}
+              />
             )}
 
             {activeTab === 'revenue' && (
@@ -358,9 +612,85 @@ const HostDashboard = () => {
                 onExportData={handleExportData}
               />
             )}
+
+            {activeTab === 'notifications' && (
+              <NotificationCenter
+                onMarkAsRead={(id) => console.log('Mark as read:', id)}
+                onClearAll={() => console.log('Clear all notifications')}
+              />
+            )}
+
+            {activeTab === 'profile' && (
+              <div className="max-w-4xl mx-auto">
+                <div className="card p-6">
+                  <div className="flex items-center space-x-4 mb-6">
+                    <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+                      <Icon name="User" size={32} className="text-primary" />
+                    </div>
+                    <div>
+                      <h1 className="text-2xl font-bold text-card-foreground">Profile Settings</h1>
+                      <p className="text-muted-foreground">Manage your host profile information</p>
+                    </div>
+                  </div>
+
+                  <ProfileForm 
+                    profile={hostProfile}
+                    onSave={handleSaveProfile}
+                  />
+                  
+                  {/* Delete Account Section */}
+                  <div className="mt-8 border-t border-border pt-8">
+                    <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-6">
+                      <div className="flex items-start space-x-4">
+                        <div className="w-12 h-12 rounded-lg bg-destructive/10 flex items-center justify-center">
+                          <Icon name="AlertTriangle" size={24} className="text-destructive" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold text-destructive mb-2">
+                            Delete Account
+                          </h3>
+                          <p className="text-muted-foreground mb-4">
+                            Permanently delete your host account and all associated data. This action cannot be undone.
+                          </p>
+                          <ul className="text-sm text-muted-foreground mb-6 space-y-1">
+                            <li>• All your events and attendee data will be deleted</li>
+                            <li>• Revenue reports and analytics will be lost</li>
+                            <li>• You will lose access to all premium features</li>
+                            <li>• Your profile and organization data will be removed</li>
+                          </ul>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            iconName="Trash2"
+                            iconPosition="left"
+                            onClick={() => {
+                              if (window.confirm('Are you absolutely sure you want to delete your account? This action cannot be undone and will permanently remove all your data.')) {
+                                if (window.confirm('This is your final warning. Type "DELETE" to confirm account deletion.') && 
+                                    prompt('Please type DELETE to confirm:') === 'DELETE') {
+                                  // Handle account deletion
+                                  localStorage.clear();
+                                  logout();
+                                  navigate('/landing-page', { replace: true });
+                                  alert('Your account has been successfully deleted.');
+                                }
+                              }
+                            }}
+                          >
+                            Delete Account
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </main>
+      
+      {/* Chat Component */}
+      <ChatSection />
     </div>
   );
 };

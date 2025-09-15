@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 
 
-const AnalyticsWidgets = ({ analyticsData }) => {
+const AnalyticsWidgets = ({ analyticsData, onEventsClick, onAttendeesClick, mockEvents }) => {
+  const [showEventsDropdown, setShowEventsDropdown] = useState(false);
   const { attendanceData, revenueData, demographicData, totalEvents, totalAttendees, totalRevenue, growthRate } = analyticsData;
 
   const COLORS = ['#7C3AED', '#6366F1', '#F59E0B', '#10B981', '#EF4444'];
@@ -18,23 +19,42 @@ const AnalyticsWidgets = ({ analyticsData }) => {
     })?.format(value);
   };
 
-  const StatCard = ({ title, value, change, icon, color = "primary" }) => (
-    <div className="bg-card rounded-lg border border-border p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <p className="text-2xl font-bold text-card-foreground mt-1">{value}</p>
-          {change && (
-            <div className={`flex items-center mt-2 text-sm ${change >= 0 ? 'text-success' : 'text-destructive'}`}>
-              <Icon name={change >= 0 ? "TrendingUp" : "TrendingDown"} size={16} className="mr-1" />
-              <span>{Math.abs(change)}% from last month</span>
-            </div>
-          )}
-        </div>
-        <div className={`w-12 h-12 rounded-lg bg-${color}/10 flex items-center justify-center`}>
-          <Icon name={icon} size={24} color={`var(--color-${color})`} />
+  const StatCard = ({ title, value, change, icon, color = "primary", onClick, isClickable, showDropdown, dropdownContent }) => (
+    <div className="relative">
+      <div 
+        className={`bg-card rounded-lg border border-border p-6 ${
+          isClickable ? 'cursor-pointer hover:shadow-elevation-2 transition-smooth' : ''
+        }`}
+        onClick={onClick}
+      >
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">{title}</p>
+            <p className="text-2xl font-bold text-card-foreground mt-1">{value}</p>
+            {change && (
+              <div className={`flex items-center mt-2 text-sm ${change >= 0 ? 'text-success' : 'text-destructive'}`}>
+                <Icon name={change >= 0 ? "TrendingUp" : "TrendingDown"} size={16} className="mr-1" />
+                <span>{Math.abs(change)}% from last month</span>
+              </div>
+            )}
+          </div>
+          <div className={`w-12 h-12 rounded-lg bg-${color}/10 flex items-center justify-center relative`}>
+            <Icon name={icon} size={24} color={`var(--color-${color})`} />
+            {isClickable && (
+              <div className="absolute -top-1 -right-1">
+                <Icon name="ArrowUpRight" size={14} className="text-muted-foreground" />
+              </div>
+            )}
+          </div>
         </div>
       </div>
+      
+      {/* Dropdown */}
+      {showDropdown && (
+        <div className="absolute top-full left-0 right-0 mt-2 bg-card rounded-lg border border-border shadow-elevation-3 z-10 max-h-64 overflow-y-auto">
+          {dropdownContent}
+        </div>
+      )}
     </div>
   );
 
@@ -48,6 +68,46 @@ const AnalyticsWidgets = ({ analyticsData }) => {
           change={12}
           icon="Calendar"
           color="primary"
+          isClickable={true}
+          onClick={() => setShowEventsDropdown(!showEventsDropdown)}
+          showDropdown={showEventsDropdown}
+          dropdownContent={
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="font-semibold text-card-foreground">All Events</h4>
+                <button 
+                  onClick={() => setShowEventsDropdown(false)}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <Icon name="X" size={16} />
+                </button>
+              </div>
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {mockEvents?.map((event) => (
+                  <div key={event.id} className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-muted/50 transition-smooth">
+                    <div className="flex-1">
+                      <h5 className="font-medium text-card-foreground text-sm">{event.title}</h5>
+                      <div className="flex items-center space-x-3 text-xs text-muted-foreground mt-1">
+                        <span>{event.date} at {event.time}</span>
+                        <span className={`px-2 py-1 rounded-full ${
+                          event.status === 'published' ? 'bg-success/10 text-success' :
+                          event.status === 'draft' ? 'bg-warning/10 text-warning' :
+                          event.status === 'completed' ? 'bg-muted text-muted-foreground' :
+                          'bg-destructive/10 text-destructive'
+                        }`}>
+                          {event.status}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-card-foreground">{event.attendees}</p>
+                      <p className="text-xs text-muted-foreground">attendees</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          }
         />
         <StatCard
           title="Total Attendees"
@@ -55,6 +115,8 @@ const AnalyticsWidgets = ({ analyticsData }) => {
           change={8}
           icon="Users"
           color="secondary"
+          isClickable={true}
+          onClick={onAttendeesClick}
         />
         <StatCard
           title="Total Revenue"

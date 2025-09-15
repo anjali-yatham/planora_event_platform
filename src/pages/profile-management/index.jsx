@@ -9,6 +9,7 @@ import AchievementsDisplay from './components/AchievementsDisplay';
 import PrivacySettings from './components/PrivacySettings';
 import IntegrationSettings from './components/IntegrationSettings';
 import Icon from '../../components/AppIcon';
+import Button from '../../components/ui/Button';
 
 const ProfileManagement = () => {
   const { userRole, logout } = useAuth();
@@ -169,7 +170,8 @@ const ProfileManagement = () => {
     { id: 'activity', label: 'Activity', icon: 'Activity' },
     { id: 'achievements', label: 'Achievements', icon: 'Trophy' },
     { id: 'privacy', label: 'Privacy', icon: 'Shield' },
-    { id: 'integrations', label: 'Integrations', icon: 'Zap' }
+    { id: 'integrations', label: 'Integrations', icon: 'Zap' },
+    { id: 'account', label: 'Account', icon: 'Settings' }
   ];
 
   const handleAvatarUpdate = (newAvatar) => {
@@ -239,13 +241,127 @@ const ProfileManagement = () => {
             onIntegrationUpdate={handleIntegrationUpdate}
           />
         );
+      case 'account':
+        return (
+          <div className="bg-card rounded-lg border border-border p-6">
+            <h2 className="text-xl font-semibold text-card-foreground mb-6">Account Settings</h2>
+            
+            {/* Account Information */}
+            <div className="space-y-6">
+              <div className="border-b border-border pb-6">
+                <h3 className="text-lg font-medium text-card-foreground mb-4">Account Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Email Address</label>
+                    <p className="text-card-foreground">sarah.johnson@email.com</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Account Type</label>
+                    <p className="text-card-foreground capitalize">{userRole} Account</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Member Since</label>
+                    <p className="text-card-foreground">{userProfile.joinedDate}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Account Status</label>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-success rounded-full"></div>
+                      <span className="text-success text-sm font-medium">Active</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Security Settings */}
+              <div className="border-b border-border pb-6">
+                <h3 className="text-lg font-medium text-card-foreground mb-4">Security</h3>
+                <div className="space-y-3">
+                  <Button
+                    variant="outline"
+                    iconName="Key"
+                    iconPosition="left"
+                  >
+                    Change Password
+                  </Button>
+                  <Button
+                    variant="outline"
+                    iconName="Smartphone"
+                    iconPosition="left"
+                  >
+                    Enable Two-Factor Authentication
+                  </Button>
+                </div>
+              </div>
+
+              {/* Data Management */}
+              <div className="border-b border-border pb-6">
+                <h3 className="text-lg font-medium text-card-foreground mb-4">Data Management</h3>
+                <div className="space-y-3">
+                  <Button
+                    variant="outline"
+                    iconName="Download"
+                    iconPosition="left"
+                  >
+                    Download My Data
+                  </Button>
+                  <Button
+                    variant="outline"
+                    iconName="FileText"
+                    iconPosition="left"
+                  >
+                    Privacy Policy
+                  </Button>
+                </div>
+              </div>
+
+              {/* Danger Zone */}
+              <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-6">
+                <h3 className="text-lg font-medium text-destructive mb-4 flex items-center space-x-2">
+                  <Icon name="AlertTriangle" size={20} />
+                  <span>Danger Zone</span>
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Once you delete your account, there is no going back. Please be certain.
+                </p>
+                <div className="space-y-3">
+                  <Button
+                    variant="outline"
+                    className="border-destructive text-destructive hover:bg-destructive hover:text-white"
+                    iconName="UserX"
+                    iconPosition="left"
+                    onClick={() => {
+                      const confirmation = window.confirm(
+                        'Are you sure you want to delete your account?\n\nThis action cannot be undone and will:\n• Permanently delete all your events and data\n• Remove your profile and connections\n• Cancel any active subscriptions\n\nType "DELETE" to confirm:'
+                      );
+                      
+                      if (confirmation) {
+                        const confirmText = window.prompt('Please type "DELETE" to confirm account deletion:');
+                        if (confirmText === 'DELETE') {
+                          // Simulate account deletion
+                          alert('Account deletion initiated. You will be logged out and redirected to the landing page.');
+                          logout();
+                          window.location.href = '/';
+                        } else if (confirmText !== null) {
+                          alert('Account deletion cancelled. Text did not match "DELETE".');
+                        }
+                      }
+                    }}
+                  >
+                    Delete Account Permanently
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
       default:
         return null;
     }
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-neutral-50">
       <Header 
         userRole={userRole} 
         isAuthenticated={true} 

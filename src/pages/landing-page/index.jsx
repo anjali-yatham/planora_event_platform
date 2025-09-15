@@ -1,12 +1,16 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../components/ui/RoleBasedRouter';
-import Header from '../../components/ui/Header';
+import LandingHeader from './components/LandingHeader';
 import AnimatedBackground from './components/AnimatedBackground';
 import HeroSection from './components/HeroSection';
 import FeatureHighlights from './components/FeatureHighlights';
+import HowItWorks from './components/HowItWorks';
+import PricingSection from './components/PricingSection';
+import ContactSection from './components/ContactSection';
 import SocialProof from './components/SocialProof';
 import CallToAction from './components/CallToAction';
+import LandingFooter from './components/LandingFooter';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -40,12 +44,10 @@ const LandingPage = () => {
     <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Animated Background */}
       <AnimatedBackground />
+      
       {/* Header */}
-      <Header 
-        isAuthenticated={false}
-        userRole={null}
-        onLogout={() => {}}
-      />
+      <LandingHeader />
+      
       {/* Main Content */}
       <main className="relative z-10">
         {/* Hero Section */}
@@ -54,34 +56,24 @@ const LandingPage = () => {
         {/* Feature Highlights */}
         <FeatureHighlights />
 
+        {/* How It Works */}
+        <HowItWorks />
+
+        {/* Pricing */}
+        <PricingSection onGetStarted={handleGetStarted} />
+
         {/* Social Proof */}
         <SocialProof />
+
+        {/* Contact */}
+        <ContactSection />
 
         {/* Call to Action */}
         <CallToAction onGetStarted={handleGetStarted} />
       </main>
+      
       {/* Footer */}
-      <footer className="relative z-10 bg-card border-t border-border py-12 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
-                <span className="text-white font-bold text-sm">P</span>
-              </div>
-              <span className="text-xl font-semibold text-foreground">Planora</span>
-            </div>
-            
-            <div className="text-center md:text-right">
-              <p className="text-muted-foreground text-sm">
-                © {new Date()?.getFullYear()} Planora. All rights reserved.
-              </p>
-              <p className="text-muted-foreground text-xs mt-1">
-                Empowering events worldwide with AI-driven innovation
-              </p>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <LandingFooter />
     </div>
   );
 };

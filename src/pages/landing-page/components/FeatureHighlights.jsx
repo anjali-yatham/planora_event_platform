@@ -7,44 +7,44 @@ const FeatureHighlights = () => {
     {
       id: 1,
       icon: "Brain",
-      title: "AI-Powered Personalization",
+      title: "AI-Powered Insights",
       description: "Intelligent event recommendations and dynamic content adaptation based on user preferences and behavior patterns.",
-      gradient: "from-purple-500 to-indigo-500"
+      gradient: "from-primary to-secondary"
     },
     {
       id: 2,
-      icon: "Globe",
-      title: "Immersive Virtual Events",
-      description: "VR/AR support with interactive networking spaces and virtual lobbies for engaging remote experiences.",
-      gradient: "from-indigo-500 to-blue-500"
+      icon: "BarChart3",
+      title: "Real-time Analytics",
+      description: "Comprehensive attendance tracking, engagement metrics, and predictive analytics with actionable insights.",
+      gradient: "from-secondary to-accent"
     },
     {
       id: 3,
-      icon: "BarChart3",
-      title: "Comprehensive Analytics",
-      description: "Real-time attendance tracking, revenue insights, and demographic breakdowns with AI-generated recommendations.",
-      gradient: "from-blue-500 to-cyan-500"
+      icon: "Target",
+      title: "Smart Targeting",
+      description: "AI-driven participant matching and personalized event recommendations for maximum engagement.",
+      gradient: "from-accent to-primary"
     },
     {
       id: 4,
-      icon: "Users",
-      title: "Smart Collaboration Hub",
-      description: "Integrated chat, digital whiteboards, live coding environments, and seamless file sharing capabilities.",
-      gradient: "from-cyan-500 to-teal-500"
+      icon: "Zap",
+      title: "Automated Workflows",
+      description: "Streamlined processes with intelligent automation for registration, notifications, and follow-ups.",
+      gradient: "from-primary to-secondary"
     },
     {
       id: 5,
-      icon: "Trophy",
-      title: "Advanced Gamification",
-      description: "Challenges, badges, points system, and real-time leaderboards to boost engagement and participation.",
-      gradient: "from-teal-500 to-green-500"
+      icon: "Shield",
+      title: "Enterprise Security",
+      description: "Role-based access control, end-to-end encryption, and GDPR/CCPA compliance for secure events.",
+      gradient: "from-secondary to-accent"
     },
     {
       id: 6,
-      icon: "Leaf",
-      title: "Sustainability Impact",
-      description: "Carbon footprint tracking and green recommendations to make your events environmentally responsible.",
-      gradient: "from-green-500 to-emerald-500"
+      icon: "Smartphone",
+      title: "Mobile First",
+      description: "Progressive web app with offline capabilities, push notifications, and native-like performance.",
+      gradient: "from-accent to-primary"
     }
   ];
 
@@ -72,7 +72,7 @@ const FeatureHighlights = () => {
   };
 
   return (
-    <section className="relative z-10 py-24 px-6">
+    <section id="features" className="relative z-10 py-24 px-6">
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -81,12 +81,12 @@ const FeatureHighlights = () => {
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 drop-shadow-lg">
             Everything You Need to
-            <span className="bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent"> Succeed</span>
+            <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"> Succeed</span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            From AI-driven insights to immersive virtual experiences, Planora provides 
+          <p className="text-xl text-white/90 max-w-3xl mx-auto drop-shadow-md">
+            From AI-driven insights to real-time analytics, Planora provides 
             the complete toolkit for modern event management.
           </p>
         </motion.div>
@@ -120,7 +120,7 @@ const FeatureHighlights = () => {
               </div>
 
               {/* Hover Effect Overlay */}
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-500/5 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/5 to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
             </motion.div>
           ))}
         </motion.div>

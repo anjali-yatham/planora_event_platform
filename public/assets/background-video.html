@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Background Video Placeholder</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .animated-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            animation: gradientShift 8s ease-in-out infinite;
+        }
+        @keyframes gradientShift {
+            0% { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+            25% { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+            50% { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+            75% { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+            100% { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        }
+        .overlay {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            color: white;
+            opacity: 0.7;
+        }
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            animation: fadeInOut 4s ease-in-out infinite;
+        }
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="animated-bg"></div>
+        <div class="particles" id="particles"></div>
+        <div class="overlay">
+            <h1>Planora Events</h1>
+            <p>Modern Event Management</p>
+        </div>
+    </div>
+    
+    <script>
+        // Create floating particles
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 50; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.width = Math.random() * 4 + 2 + 'px';
+            particle.style.height = particle.style.width;
+            particle.style.animationDelay = Math.random() * 6 + 's';
+            particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+            particlesContainer.appendChild(particle);
+        }
+    </script>
+</body>
+</html>

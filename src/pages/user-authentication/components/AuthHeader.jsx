@@ -6,8 +6,8 @@ const AuthHeader = ({ mode }) => {
     <div className="text-center mb-8">
       {/* Logo */}
       <div className="flex items-center justify-center mb-6">
-        <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center mr-3">
-          <Icon name="Calendar" size={24} color="white" />
+        <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-primary to-secondary flex items-center justify-center mr-3">
+          <Icon name="Zap" size={24} color="white" />
         </div>
         <span className="text-2xl font-bold text-foreground">Planora</span>
       </div>

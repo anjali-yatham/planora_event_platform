@@ -40,7 +40,7 @@ const CallToAction = ({ onGetStarted }) => {
                 variant="secondary"
                 size="xl"
                 onClick={onGetStarted}
-                className="bg-white text-purple-600 hover:bg-white/90 px-8 py-4 text-lg font-semibold shadow-elevation-2 hover:shadow-elevation-3 transition-all duration-300"
+                className="bg-white text-primary hover:bg-white/90 px-8 py-4 text-lg font-semibold shadow-elevation-2 hover:shadow-elevation-3 transition-all duration-300"
                 iconName="ArrowRight"
                 iconPosition="right"
               >

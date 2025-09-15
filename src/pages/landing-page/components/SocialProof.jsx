@@ -102,11 +102,11 @@ const SocialProof = () => {
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+          <h2 className="text-4xl md:text-5xl font-bold text-[#5A4FCF] mb-6">
             Trusted by Event
-            <span className="bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent"> Professionals</span>
+            <span className="text-[#5A4FCF]"> Professionals</span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-xl text-white max-w-3xl mx-auto drop-shadow-md">
             Join thousands of event organizers who have transformed their events with Planora
           </p>
         </motion.div>

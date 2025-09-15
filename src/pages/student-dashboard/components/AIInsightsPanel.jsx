@@ -2,7 +2,7 @@ import React from 'react';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 
-const AIInsightsPanel = ({ insights, onRefresh, onViewAll }) => {
+const AIInsightsPanel = ({ insights, onRefresh, onViewAll, onTakeAction }) => {
   const getInsightIcon = (type) => {
     switch (type) {
       case 'recommendation':
@@ -105,6 +105,7 @@ const AIInsightsPanel = ({ insights, onRefresh, onViewAll }) => {
                         variant="ghost"
                         size="sm"
                         className="text-xs h-6 px-2"
+                        onClick={() => onTakeAction?.(insight)}
                       >
                         Take Action
                       </Button>

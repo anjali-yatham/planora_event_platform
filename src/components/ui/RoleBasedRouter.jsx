@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext();
 
@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const checkAuthStatus = () => {
@@ -65,6 +66,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('planora_auth');
     setIsAuthenticated(false);
     setUserRole(null);
+    navigate('/landing-page');
   };
 
   const value = {

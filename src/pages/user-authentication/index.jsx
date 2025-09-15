@@ -96,7 +96,7 @@ const UserAuthentication = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-slate-100">
       {/* Animated Gradient Background */}
       <div className="fixed inset-0 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5"></div>

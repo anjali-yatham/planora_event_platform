@@ -13,6 +13,8 @@ import UpcomingEventsList from './components/UpcomingEventsList';
 import AchievementBadge from './components/AchievementBadge';
 import AIInsightsPanel from './components/AIInsightsPanel';
 import QuickStatsGrid from './components/QuickStatsGrid';
+import Toast from '../../components/ui/Toast';
+import PaymentModal from '../../components/ui/PaymentModal';
 
 const StudentDashboard = () => {
   const navigate = useNavigate();
@@ -21,6 +23,18 @@ const StudentDashboard = () => {
   const [eventFilter, setEventFilter] = useState('all');
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [showEventModal, setShowEventModal] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  const [paymentModal, setPaymentModal] = useState({ show: false, event: null });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [userProfile, setUserProfile] = useState({
+    name: 'John Doe',
+    email: 'john.doe@example.com',
+    bio: 'Passionate about technology and learning new skills.',
+    interests: ['React', 'AI', 'Machine Learning'],
+    location: 'San Francisco, CA'
+  });
 
   // Mock data for registered events
   const [registeredEvents] = useState([
@@ -32,14 +46,15 @@ const StudentDashboard = () => {
       startDate: "2025-01-20T10:00:00Z",
       endDate: "2025-01-20T16:00:00Z",
       location: "Virtual - Zoom",
-      type: "virtual",
+      type: "ONLINE",
       status: "upcoming",
       attendees: 45,
       capacity: 50,
       isPaid: true,
       price: 99,
       category: "Technology",
-      certificateAvailable: false
+      certificateAvailable: false,
+      meetingLink: "https://zoom.us/j/1234567890?pwd=abcd1234"
     },
     {
       id: 2,
@@ -49,14 +64,15 @@ const StudentDashboard = () => {
       startDate: "2025-01-15T09:00:00Z",
       endDate: "2025-01-15T17:00:00Z",
       location: "Live Stream",
-      type: "virtual",
+      type: "ONLINE",
       status: "live",
       attendees: 234,
       capacity: 500,
       isPaid: false,
       price: 0,
       category: "Healthcare",
-      certificateAvailable: false
+      certificateAvailable: false,
+      meetingLink: "https://meet.google.com/xyz-abcd-123"
     },
     {
       id: 3,
@@ -66,14 +82,19 @@ const StudentDashboard = () => {
       startDate: "2024-12-10T14:00:00Z",
       endDate: "2024-12-10T18:00:00Z",
       location: "San Francisco, CA",
-      type: "in-person",
+      type: "OFFLINE",
       status: "completed",
       attendees: 89,
       capacity: 100,
       isPaid: true,
       price: 149,
       category: "Marketing",
-      certificateAvailable: true
+      certificateAvailable: true,
+      venue: {
+        name: "SF Convention Center",
+        address: "747 Howard St, San Francisco, CA 94103",
+        timing: "2:00 PM - 6:00 PM PST"
+      }
     }
   ]);
 
@@ -231,6 +252,7 @@ const StudentDashboard = () => {
     { id: 'overview', label: 'Overview', icon: 'LayoutDashboard' },
     { id: 'events', label: 'My Events', icon: 'Calendar' },
     { id: 'recommendations', label: 'Recommendations', icon: 'Lightbulb' },
+    { id: 'ai-insights', label: 'AI Insights', icon: 'Brain' },
     { id: 'progress', label: 'Progress', icon: 'TrendingUp' }
   ];
 
@@ -240,16 +262,42 @@ const StudentDashboard = () => {
   });
 
   const handleJoinEvent = (event) => {
-    if (event?.status === 'live') {
-      // Simulate joining live event
-      window.open('https://zoom.us/j/example', '_blank');
-    } else if (event?.status === 'upcoming') {
-      // Add to calendar functionality
-      const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event?.title)}&dates=${event?.startDate?.replace(/[-:]/g, '')?.replace(/\.\d{3}/, '')}&details=${encodeURIComponent(event?.description)}`;
-      window.open(calendarUrl, '_blank');
+    if (event?.type === 'ONLINE') {
+      // For virtual events - redirect to meeting link (Zoom/Google Meet)
+      if (event?.meetingLink) {
+        window.open(event.meetingLink, '_blank');
+        showToast('Redirecting to virtual meeting...', 'success');
+      } else {
+        showToast('Meeting link not available', 'error');
+      }
+    } else if (event?.type === 'OFFLINE') {
+      // For offline events - show event details page with registration info
+      if (event?.isPaid && event?.price > 0) {
+        // Show payment + registration option for paid events
+        setPaymentModal({ show: true, event });
+      } else {
+        // Show free registration option for free events
+        setSelectedEvent(event);
+        setShowEventModal(true);
+        showToast(`Event Details Available!\nVenue: ${event?.venue?.name || event?.location}\nDate: ${new Date(event?.startDate).toLocaleDateString()}`, 'info');
+      }
     } else if (event?.status === 'completed' && event?.certificateAvailable) {
       // Download certificate
-      alert('Certificate download started!');
+      showToast('Certificate download started!', 'success');
+    }
+  };
+
+  const handleJoinNow = (event) => {
+    if (event?.type === 'ONLINE') {
+      if (event?.meetingLink) {
+        window.open(event.meetingLink, '_blank');
+        showToast('Redirecting to online meeting...', 'success');
+      } else {
+        showToast('Meeting link not available', 'error');
+      }
+    } else if (event?.type === 'OFFLINE') {
+      // Show offline event registration details
+      showToast(`Event Details:\nVenue: ${event?.venue?.name}\nAddress: ${event?.venue?.address}\nTime: ${event?.venue?.timing}`, 'info');
     }
   };
 
@@ -259,7 +307,20 @@ const StudentDashboard = () => {
   };
 
   const handleRegisterForEvent = (event) => {
-    alert(`Registration initiated for: ${event?.title}`);
+    setPaymentModal({ show: true, event });
+  };
+
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
+  };
+
+  const hideToast = () => {
+    setToast({ show: false, message: '', type: 'success' });
+  };
+
+  const handlePaymentSuccess = () => {
+    showToast('Registration Successful!', 'success');
+    setPaymentModal({ show: false, event: null });
   };
 
   const handleDismissRecommendation = (eventId) => {
@@ -271,7 +332,67 @@ const StudentDashboard = () => {
   };
 
   const handleViewAllInsights = () => {
-    alert('Viewing all AI insights...');
+    // Navigate to AI Insights tab and show all insights
+    setActiveTab('ai-insights');
+  };
+
+  const handleTakeAction = (insight) => {
+    if (insight?.type === 'recommendation') {
+      // Show matching events from recommendations
+      const matchedEvents = recommendations.slice(0, 3); // Get first 3 matched events
+      setSelectedEvent({ 
+        ...insight,
+        matchedEvents,
+        title: 'Perfect Match Found - 3 Events',
+        description: 'We found 3 new events that match your interests. Would you like to register for any of these events?'
+      });
+      setShowEventModal(true);
+    } else if (insight?.type === 'trend') {
+      // Navigate to recommendations with filter for trending topic
+      setActiveTab('recommendations');
+      showToast('Showing trending AI and Machine Learning events', 'success');
+    }
+  };
+
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+    
+    if (query.trim().length === 0) {
+      setSearchResults([]);
+      setShowSearchResults(false);
+      return;
+    }
+
+    // Search through registered events and recommendations
+    const allEvents = [...registeredEvents, ...recommendations];
+    const results = allEvents.filter(event => 
+      event?.title?.toLowerCase().includes(query.toLowerCase()) ||
+      event?.description?.toLowerCase().includes(query.toLowerCase()) ||
+      event?.category?.toLowerCase().includes(query.toLowerCase()) ||
+      event?.type?.toLowerCase().includes(query.toLowerCase())
+    );
+
+    setSearchResults(results);
+    setShowSearchResults(true);
+  };
+
+  const handleUpdateProfile = (updatedProfile) => {
+    setUserProfile(updatedProfile);
+    // Simulate saving to backend
+    localStorage.setItem('student_profile', JSON.stringify(updatedProfile));
+    showToast('Profile updated successfully!', 'success');
+  };
+
+  const handleSignOut = () => {
+    // Clear session data
+    localStorage.removeItem('student_dashboard_preferences');
+    localStorage.removeItem('student_profile');
+    localStorage.removeItem('user_auth');
+    // Call logout function
+    logout();
+    // Redirect to landing page
+    navigate('/', { replace: true });
+    showToast('Signed out successfully', 'success');
   };
 
   const handleAchievementClick = (achievement) => {
@@ -312,6 +433,17 @@ const StudentDashboard = () => {
         setEventFilter(preferences?.eventFilter || 'all');
       } catch (error) {
         console.error('Error loading dashboard preferences:', error);
+      }
+    }
+
+    // Load user profile from localStorage
+    const savedProfile = localStorage.getItem('student_profile');
+    if (savedProfile) {
+      try {
+        const profile = JSON.parse(savedProfile);
+        setUserProfile(profile);
+      } catch (error) {
+        console.error('Error loading user profile:', error);
       }
     }
   }, []);
@@ -392,6 +524,7 @@ const StudentDashboard = () => {
             insights={aiInsights}
             onRefresh={handleRefreshInsights}
             onViewAll={handleViewAllInsights}
+            onTakeAction={handleTakeAction}
           />
         </div>
       </div>
@@ -595,8 +728,214 @@ const StudentDashboard = () => {
     </div>
   );
 
+  const renderAIInsightsTab = () => (
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold text-foreground">AI Insights</h2>
+        <Button
+          variant="outline"
+          iconName="RefreshCw"
+          onClick={handleRefreshInsights}
+        >
+          Refresh
+        </Button>
+      </div>
+      
+      <div className="grid gap-6">
+        {aiInsights?.map((insight) => (
+          <div key={insight?.id} className="bg-card border border-border rounded-lg p-6">
+            <div className="flex items-start space-x-4">
+              <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                insight?.type === 'recommendation' ? 'bg-primary/10' :
+                insight?.type === 'achievement' ? 'bg-success/10' :
+                insight?.type === 'trend' ? 'bg-accent/10' : 'bg-muted'
+              }`}>
+                <Icon
+                  name={insight?.type === 'recommendation' ? 'Lightbulb' :
+                        insight?.type === 'achievement' ? 'Trophy' :
+                        insight?.type === 'trend' ? 'TrendingUp' : 'Info'}
+                  size={24}
+                  className={
+                    insight?.type === 'recommendation' ? 'text-primary' :
+                    insight?.type === 'achievement' ? 'text-success' :
+                    insight?.type === 'trend' ? 'text-accent' : 'text-muted-foreground'
+                  }
+                />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-card-foreground mb-2">{insight?.title}</h3>
+                <p className="text-muted-foreground mb-4">{insight?.description}</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">
+                    {new Date(insight?.timestamp).toLocaleDateString()}
+                  </span>
+                  {insight?.actionable && (
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={() => handleTakeAction(insight)}
+                    >
+                      Take Action
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            {insight?.matchedEvents && (
+              <div className="mt-6 pt-6 border-t border-border">
+                <h4 className="font-medium text-card-foreground mb-4">Matched Events:</h4>
+                <div className="grid gap-4">
+                  {insight.matchedEvents.map((event) => (
+                    <div key={event?.id} className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+                      <div>
+                        <h5 className="font-medium text-card-foreground">{event?.title}</h5>
+                        <p className="text-sm text-muted-foreground">{event?.category} • {event?.location}</p>
+                        <p className="text-sm text-muted-foreground">{new Date(event?.startDate).toLocaleDateString()}</p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        {event?.isPaid && (
+                          <span className="text-sm font-medium">${event?.price}</span>
+                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleRegisterForEvent(event)}
+                        >
+                          Register
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderProfileTab = () => (
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold text-foreground">Profile Settings</h2>
+        <Button
+          variant="outline"
+          iconName="LogOut"
+          onClick={handleSignOut}
+        >
+          Sign Out
+        </Button>
+      </div>
+      
+      <div className="bg-card border border-border rounded-lg">
+        <div className="p-6">
+          <div className="flex items-center space-x-6 mb-8">
+            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
+              <span className="text-2xl font-bold text-primary">
+                {userProfile?.name?.split(' ').map(n => n[0]).join('') || 'JD'}
+              </span>
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold text-card-foreground">{userProfile?.name}</h3>
+              <p className="text-muted-foreground">{userProfile?.email}</p>
+            </div>
+          </div>
+          
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-card-foreground mb-2">
+                Full Name
+              </label>
+              <input
+                type="text"
+                value={userProfile?.name}
+                onChange={(e) => setUserProfile(prev => ({ ...prev, name: e.target.value }))}
+                className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-card-foreground mb-2">
+                Email
+              </label>
+              <input
+                type="email"
+                value={userProfile?.email}
+                onChange={(e) => setUserProfile(prev => ({ ...prev, email: e.target.value }))}
+                className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-card-foreground mb-2">
+                Bio
+              </label>
+              <textarea
+                rows={3}
+                value={userProfile?.bio}
+                onChange={(e) => setUserProfile(prev => ({ ...prev, bio: e.target.value }))}
+                className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-card-foreground mb-2">
+                Location
+              </label>
+              <input
+                type="text"
+                value={userProfile?.location}
+                onChange={(e) => setUserProfile(prev => ({ ...prev, location: e.target.value }))}
+                className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-card-foreground mb-2">
+                Interests
+              </label>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {userProfile?.interests?.map((interest, index) => (
+                  <span key={index} className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
+                    {interest}
+                  </span>
+                ))}
+              </div>
+              <input
+                type="text"
+                placeholder="Add interests separated by commas"
+                className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && e.target.value.trim()) {
+                    const newInterests = e.target.value.split(',').map(i => i.trim()).filter(i => i);
+                    setUserProfile(prev => ({ 
+                      ...prev, 
+                      interests: [...(prev.interests || []), ...newInterests]
+                    }));
+                    e.target.value = '';
+                  }
+                }}
+              />
+            </div>
+            
+            <div className="flex justify-end">
+              <Button
+                variant="default"
+                onClick={() => handleUpdateProfile(userProfile)}
+              >
+                Save Changes
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#F9FAFB]">
       <Header
         userRole={userRole}
         isAuthenticated={true}
@@ -609,7 +948,7 @@ const StudentDashboard = () => {
 
           {/* Welcome Section */}
           <div className="mb-8">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
               <div>
                 <h1 className="text-3xl font-bold text-foreground mb-2">
                   Welcome back, Student! 👋
@@ -618,14 +957,53 @@ const StudentDashboard = () => {
                   Discover new events, track your progress, and continue your learning journey.
                 </p>
               </div>
-              <Button
-                variant="default"
-                iconName="Search"
-                iconPosition="left"
-                onClick={() => alert('Opening event search...')}
-              >
-                Find Events
-              </Button>
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <Icon name="Search" size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    type="text"
+                    placeholder="Search events..."
+                    value={searchQuery}
+                    onChange={(e) => handleSearch(e.target.value)}
+                    className="pl-10 pr-4 py-2 w-64 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground"
+                  />
+                  {showSearchResults && (
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
+                      {searchResults?.length === 0 ? (
+                        <div className="p-4 text-center text-muted-foreground">
+                          No events found for "{searchQuery}"
+                        </div>
+                      ) : (
+                        searchResults?.map((result) => (
+                          <div
+                            key={result?.id}
+                            className="p-4 hover:bg-muted/30 cursor-pointer border-b border-border last:border-b-0"
+                            onClick={() => handleViewEventDetails(result)}
+                          >
+                            <h4 className="font-medium text-card-foreground">{result?.title}</h4>
+                            <p className="text-sm text-muted-foreground">{result?.category} • {result?.location}</p>
+                            {result?.isPaid && (
+                              <span className="text-sm font-medium text-primary">${result?.price}</span>
+                            )}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+                <Button
+                  variant="outline"
+                  iconName="X"
+                  size="sm"
+                  onClick={() => {
+                    setSearchQuery('');
+                    setShowSearchResults(false);
+                  }}
+                  className={showSearchResults ? 'opacity-100' : 'opacity-0 pointer-events-none'}
+                >
+                  Clear
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -655,7 +1033,9 @@ const StudentDashboard = () => {
             {activeTab === 'overview' && renderOverviewTab()}
             {activeTab === 'events' && renderEventsTab()}
             {activeTab === 'recommendations' && renderRecommendationsTab()}
+            {activeTab === 'ai-insights' && renderAIInsightsTab()}
             {activeTab === 'progress' && renderProgressTab()}
+            {activeTab === 'profile' && renderProfileTab()}
           </div>
         </div>
       </main>
@@ -739,6 +1119,31 @@ const StudentDashboard = () => {
           </div>
         </div>
       )}
+
+      {/* Toast Notification */}
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.show}
+        onClose={hideToast}
+      />
+
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={paymentModal.show}
+        onClose={() => setPaymentModal({ show: false, event: null })}
+        event={paymentModal.event}
+        onPaymentSuccess={handlePaymentSuccess}
+      />
+
+      {/* Floating Chat Button */}
+      <button
+        onClick={() => setActiveTab('chat')}
+        className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center z-50"
+        title="Open Chat"
+      >
+        <Icon name="MessageCircle" size={24} />
+      </button>
     </div>
   );
 };

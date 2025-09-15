@@ -212,7 +212,7 @@ const EventCreationWizard = () => {
 
   return (
     <RoleBasedRouter requiredRole="host">
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-gray-50">
         <Header 
           userRole={userRole} 
           isAuthenticated={true} 

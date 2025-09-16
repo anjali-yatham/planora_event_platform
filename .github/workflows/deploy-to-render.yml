@@ -8,7 +8,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -23,54 +22,24 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
 
-      - name: Check Render API Key presence
-        run: |
-          if [ -z "$RENDER_API_KEY" ]; then
-            echo "❌ RENDER_API_KEY is not set. Please add it to your repository secrets."
-            exit 1
-          else
-            echo "✅ RENDER_API_KEY is set."
-          fi
-        env:
-          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-
       - name: Trigger deploy via Render API
         id: trigger_deploy
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
         run: |
-          SERVICE_ID="srv-d33ur90dl3ps739701og"
-          echo "Triggering deploy on Render service $SERVICE_ID..."
-          response=$(curl -s -o /dev/null -w "%{http_code}" -X POST "https://api.render.com/deploy/$SERVICE_ID" \
+          SERVICE_ID="srv-d34gj33ipnbc73fv5sh0"
+          echo "🚀 Triggering deploy on Render service $SERVICE_ID..."
+          
+          response=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+            "https://api.render.com/v1/services/$SERVICE_ID/deploys" \
             -H "Accept: application/json" \
             -H "Authorization: Bearer $RENDER_API_KEY")
-
+          
           echo "response_code=$response" >> $GITHUB_OUTPUT
-
-          if [ "$response" -eq 200 ] || [ "$response" -eq 201 ]; then
+          
+          if [ "$response" -eq 200 ] || [ "$response" -eq 201 ] || [ "$response" -eq 202 ]; then
             echo "✅ Deploy triggered successfully."
           else
             echo "❌ Failed to trigger deploy. HTTP status code: $response"
             exit 1
           fi
-
-      - name: Notify success
-        if: success()
-        run: echo "✅ Deployment to Render succeeded!"
-
-      - name: Notify failure
-        if: failure()
-        run: echo "❌ Deployment to Render failed!"
-
-      # Optional Slack notification (uncomment and configure if needed)
-      # - name: Slack Notification
-      #   if: failure() || success()
-      #   uses: slackapi/slack-github-action@v1.23.0
-      #   with:
-      #     payload: |
-      #       {
-      #         "text": "Render deployment status: ${{ job.status }} for commit ${{ github.sha }} on branch ${{ github.ref_name }}"
-      #       }
-      #   env:
-      #     SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-      #     SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}

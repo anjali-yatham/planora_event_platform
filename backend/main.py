@@ -8,6 +8,7 @@ from jose import JWTError, jwt
 from datetime import datetime, timedelta
 import random
 from typing import List, Dict
+from sqlalchemy import text
 
 from backend.carbon_footprint import estimate_event_carbon_footprint
 
@@ -192,3 +193,11 @@ def get_leaderboard(event_id: int):
         "event_id": event_id,
         "leaderboard": dummy_leaderboard_data
     }
+@app.get("/db-health")
+def db_health():
+    try:
+        with engine.connect() as conn:
+            result = conn.execute(text("SELECT 1")).fetchone()
+            return {"db_status": "connected", "result": result[0]}
+    except Exception as e:
+        return {"db_status": "error", "details": str(e)}

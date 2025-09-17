@@ -1,13 +1,3 @@
-import React from "react";
-import Routes from "./Routes";
-
-function App() {
-  return (
-    <Routes />
-  );
-}
-
-export default App;
 import BackendHealthCheck from "./pages/BackendHealthCheck";
 
 function App() {
@@ -20,3 +10,4 @@ function App() {
 }
 
 export default App;
+

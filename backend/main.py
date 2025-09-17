@@ -8,6 +8,8 @@ from jose import JWTError, jwt
 from datetime import datetime, timedelta
 import random
 from typing import List, Dict
+from fastapi.middleware.cors import CORSMiddleware
+
 from sqlalchemy import text
 
 from backend.carbon_footprint import estimate_event_carbon_footprint
@@ -61,6 +63,20 @@ Base.metadata.create_all(bind=engine)
 
 # FastAPI app instance
 app = FastAPI()
+
+# Allow frontend to call backend
+origins = [
+    os.getenv("FRONTEND_URL", "http://localhost:3000")  # local frontend
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 # Utility functions
 def verify_password(plain_password, hashed_password):

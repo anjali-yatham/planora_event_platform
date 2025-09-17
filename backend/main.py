@@ -1,7 +1,7 @@
 import os
 from fastapi import FastAPI, Depends, HTTPException, status, WebSocket, WebSocketDisconnect
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, text
 from sqlalchemy.orm import sessionmaker, declarative_base
 from passlib.context import CryptContext
 from jose import JWTError, jwt
@@ -9,8 +9,6 @@ from datetime import datetime, timedelta
 import random
 from typing import List, Dict
 from fastapi.middleware.cors import CORSMiddleware
-
-from sqlalchemy import text
 
 from backend.carbon_footprint import estimate_event_carbon_footprint
 
@@ -42,7 +40,7 @@ class User(Base):
     username = Column(String, unique=True, nullable=False)
     email = Column(String, unique=True, nullable=False)
     hashed_password = Column(String)
-    role = Column(String, nullable=False)
+    role = Column(String, nullable=False)  # student, host, organizer
     skills = Column(String)
 
 class Event(Base):
@@ -77,7 +75,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 # Utility functions
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -105,25 +102,43 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 # API endpoints
 @app.post("/signup", status_code=status.HTTP_201_CREATED)
 def signup(data: dict, db=Depends(lambda: SessionLocal())):
+    # check if user already exists
+    if db.query(User).filter(User.username == data['username']).first():
+        raise HTTPException(status_code=400, detail="Username already exists")
+    if db.query(User).filter(User.email == data['email']).first():
+        raise HTTPException(status_code=400, detail="Email already exists")
+
     hashed_password = get_password_hash(data['password'])
     db_user = User(
         username=data['username'],
         email=data['email'],
         hashed_password=hashed_password,
-        role=data.get('role', 'participant'),
+        role=data.get('role', 'student'),  # default to student
         skills=data.get('skills', '')
     )
     db.add(db_user)
     db.commit()
-    return {"message": "User  created successfully"}
+    db.refresh(db_user)
+    return {
+        "message": "User created successfully",
+        "username": db_user.username,
+        "email": db_user.email,
+        "role": db_user.role
+    }
 
 @app.post("/login", status_code=status.HTTP_200_OK)
 def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db=Depends(lambda: SessionLocal())):
     user = db.query(User).filter(User.username == form_data.username).first()
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+
     access_token = create_access_token(data={"sub": user.username})
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "role": user.role,  # include role in login response
+        "username": user.username
+    }
 
 @app.post("/events", status_code=status.HTTP_201_CREATED)
 def create_event(data: dict, current_user: dict = Depends(get_current_user), db=Depends(lambda: SessionLocal())):
@@ -170,7 +185,7 @@ manager = ConnectionManager()
 @app.websocket("/ws/chat/{event_id}/{username}")
 async def websocket_endpoint(websocket: WebSocket, event_id: int, username: str):
     await manager.connect(websocket, event_id)
-    print(f"User  {username} joined event {event_id} chat.")
+    print(f"User {username} joined event {event_id} chat.")
     try:
         while True:
             data = await websocket.receive_text()
@@ -178,8 +193,8 @@ async def websocket_endpoint(websocket: WebSocket, event_id: int, username: str)
             await manager.broadcast(message, event_id)
     except WebSocketDisconnect:
         manager.disconnect(websocket, event_id)
-        print(f"User  {username} left event {event_id} chat.")
-        await manager.broadcast(f"User  {username} has left the chat.", event_id)
+        print(f"User {username} left event {event_id} chat.")
+        await manager.broadcast(f"User {username} has left the chat.", event_id)
 
 @app.get("/events/{event_id}/carbon_footprint", status_code=status.HTTP_200_OK)
 def get_carbon_footprint(event_id: int):
@@ -209,6 +224,7 @@ def get_leaderboard(event_id: int):
         "event_id": event_id,
         "leaderboard": dummy_leaderboard_data
     }
+
 @app.get("/db-health")
 def db_health():
     try:

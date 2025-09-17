@@ -155,10 +155,15 @@ const UserAuthentication = () => {
 export default UserAuthentication;
 import React, { useEffect } from "react";
 
-useEffect(() => {
-  fetch(`${import.meta.env.VITE_BACKEND_URL}/db-health`)
-    .then(res => res.json())
-    .then(data => console.log("✅ Frontend connected to Backend:", data))
-    .catch(err => console.error("❌ Frontend cannot reach Backend:", err));
-}, []);
+export default function TestBackend() {
+  useEffect(() => {
+    console.log("🚀 Testing backend connection...");
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/db-health`)
+      .then(res => res.json())
+      .then(data => console.log("✅ Frontend connected to Backend:", data))
+      .catch(err => console.error("❌ Frontend cannot reach Backend:", err));
+  }, []);
+
+  return <div>Backend connection test running... check console!</div>;
+}
 

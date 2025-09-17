@@ -89,7 +89,7 @@ const UserAuthentication = () => {
       const dashboardPath = role === 'student' ? '/student-dashboard' : '/host-dashboard';
       navigate(dashboardPath, { replace: true });
     } catch (err) {
-      setError(Failed to authenticate with ${providerId}. Please try again.);
+      setError(`Failed to authenticate with ${providerId}. Please try again.`);
     } finally {
       setLoading(false);
     }

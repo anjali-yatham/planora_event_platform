@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import AuthHeader from './components/AuthHeader';
 import AuthForm from './components/AuthForm';
@@ -10,8 +10,8 @@ const UserAuthPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Store role in localStorage (optional)
   const login = (role) => {
-    // store role in localStorage (optional)
     localStorage.setItem('role', role);
   };
 
@@ -22,7 +22,7 @@ const UserAuthPage = () => {
     try {
       if (mode === 'signin') {
         // 🔗 Call FastAPI login
-        const response = await fetch(${import.meta.env.VITE_BACKEND_URL}/login, {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: new URLSearchParams({
@@ -34,20 +34,21 @@ const UserAuthPage = () => {
         if (!response.ok) throw new Error('Invalid email or password');
         const data = await response.json();
 
-        // save token in localStorage
+        // Save token in localStorage
         localStorage.setItem('access_token', data.access_token);
 
-        // get role (backend may need to include this in login response)
+        // Get role (backend may need to include this in login response)
         const role = data.role || 'student';
         login(role);
 
+        // Navigate to correct dashboard
         const from = location?.state?.from?.pathname ||
           (role === 'student' ? '/student-dashboard' : '/host-dashboard');
         navigate(from, { replace: true });
 
       } else {
         // 🔗 Call FastAPI signup
-        const response = await fetch(${import.meta.env.VITE_BACKEND_URL}/signup, {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/signup`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -74,6 +75,14 @@ const UserAuthPage = () => {
     }
   };
 
+  // Check backend connection on mount
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/db-health`)
+      .then(res => res.json())
+      .then(data => console.log("✅ Backend connected:", data))
+      .catch(err => console.error("❌ Backend connection failed:", err));
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Left side: header */}
@@ -96,16 +105,3 @@ const UserAuthPage = () => {
 };
 
 export default UserAuthPage;
-// Temporary test to check backend connection
-React.useEffect(() => {
-  fetch(${import.meta.env.VITE_BACKEND_URL}/db-health)
-    .then(res => res.json())
-    .then(data => console.log("✅ Backend connected:", data))
-    .catch(err => console.error("❌ Backend connection failed:", err));
-}, []);
-useEffect(() => {
-  fetch(`${import.meta.env.VITE_BACKEND_URL}/db-health`)
-    .then(res => res.json())
-    .then(data => console.log("Backend health:", data))
-    .catch(err => console.error("Error connecting backend:", err));
-}, []);

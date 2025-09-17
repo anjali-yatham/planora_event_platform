@@ -155,7 +155,7 @@ const UserAuthentication = () => {
 export default UserAuthentication;
 import React, { useEffect } from "react";
 
-export default function TestBackend() {
+export default function BackendHealthCheck() {
   useEffect(() => {
     console.log("🚀 Testing backend connection...");
     fetch(`${import.meta.env.VITE_BACKEND_URL}/db-health`)
@@ -164,6 +164,8 @@ export default function TestBackend() {
       .catch(err => console.error("❌ Frontend cannot reach Backend:", err));
   }, []);
 
-  return <div>Backend connection test running... check console!</div>;
+  return <div>🔍 Backend health check running... open Console (F12 → Console tab)</div>;
 }
+
+
 

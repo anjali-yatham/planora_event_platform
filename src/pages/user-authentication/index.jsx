@@ -103,3 +103,9 @@ React.useEffect(() => {
     .then(data => console.log("✅ Backend connected:", data))
     .catch(err => console.error("❌ Backend connection failed:", err));
 }, []);
+useEffect(() => {
+  fetch(`${import.meta.env.VITE_BACKEND_URL}/db-health`)
+    .then(res => res.json())
+    .then(data => console.log("Backend health:", data))
+    .catch(err => console.error("Error connecting backend:", err));
+}, []);

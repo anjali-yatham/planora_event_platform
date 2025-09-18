@@ -4,7 +4,7 @@ function BackendHealthCheck() {
   const [status, setStatus] = useState("Checking...");
 
   useEffect(() => {
-    fetch("https://planora-event-platform.onrender.com/health") // 🔥 use Render URL
+    fetch("https://planora-event-platform.onrender.com") // 🔥 use Render URL
       .then((res) => res.json())
       .then((data) => setStatus(`✅ Connected: ${JSON.stringify(data)}`))
       .catch(() => setStatus("❌ Not connected"));
@@ -19,5 +19,3 @@ function BackendHealthCheck() {
 }
 
 export default BackendHealthCheck;
-
-

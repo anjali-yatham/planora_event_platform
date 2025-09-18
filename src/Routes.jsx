@@ -25,6 +25,7 @@ import Internships from './pages/internships';
 import MockTests from './pages/mock-tests';
 import Gamification from './pages/gamification';
 import CareerInsights from './pages/career-insights';
+import BackendHealthCheck from './pages/BackendHealthCheck'; // ⬅️ add this import
 
 const Routes = () => {
   return (
@@ -56,6 +57,7 @@ const Routes = () => {
           <Route path="/mock-tests" element={<MockTests />} />
           <Route path="/gamification" element={<Gamification />} />
           <Route path="/career-insights" element={<CareerInsights />} />
+          <Route path="/backend-test" element={<BackendHealthCheck />} />
           <Route path="*" element={<NotFound />} />
         </RouterRoutes>
         </ErrorBoundary>

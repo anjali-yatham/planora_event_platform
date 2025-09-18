@@ -64,7 +64,9 @@ app = FastAPI()
 
 # Allow frontend to call backend
 origins = [
-    os.getenv("FRONTEND_URL", "http://localhost:3000")  # local frontend
+    "http://localhost:3000",              # default React dev server
+    "http://localhost:4028",              # your current dev server
+    "https://planora-frontend.onrender.com"  # deployed frontend (replace if different)
 ]
 
 app.add_middleware(

@@ -4,10 +4,10 @@ function BackendHealthCheck() {
   const [status, setStatus] = useState("Checking...");
 
   useEffect(() => {
-    fetch("http://localhost:5000/health") // 🔹 Replace with your backend Render URL later
+    fetch("http://localhost:5000/health") // 🔹 Replace with your Render backend URL later
       .then((res) => res.json())
       .then((data) => setStatus(`✅ Connected: ${JSON.stringify(data)}`))
-      .catch((err) => setStatus("❌ Not connected"));
+      .catch(() => setStatus("❌ Not connected"));
   }, []);
 
   return (
@@ -19,3 +19,4 @@ function BackendHealthCheck() {
 }
 
 export default BackendHealthCheck;
+
